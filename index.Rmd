@@ -27,14 +27,14 @@ library(metathis)
 meta() %>%
   meta_name("github-repo" = "r4hr/club_de_r") %>% 
   meta_social(
-    title = "Sesión abierta Nov. 2020 - Introducción a RMarkdown",
+    title = "Sesión abierta Dic. 2020 - Introducción a dplyr",
     description = paste(
-      "Una introducción a cómo realizar informes con la versión preview de RStudio 1.4",
+      "Una introducción a cómo manipular y transformar datos con dplyr",
       "por el Club de R para RRHH"),
     url = "https://clubder-rmarkdown.netlify.app/",
-    image = "https://github.com/r4hr/club_de_r/blob/master/Archivos/kiwi-fondo.png",
+    image = "https://github.com/r4hr/r4hr_introduccion_dplyr/blob/main/Archivos/kiwi-fondo.png",
     image_alt = paste(
-      "Inttroducción a RMarkdown con RStudio 1.4", 
+      "Inttroducción a dplyr", 
       "Desarrollada por el Club de R para RRHH"
     ),
     og_type = "website",
@@ -60,9 +60,9 @@ Image credit: [Designed by Freepik]("http://www.freepik.com")
 
 El [Club de R para RRHH](https://r4hr.club) es una comunidad de aprendizaje de programación en R destinada para las personas que trabajan en Recursos Humanos de habla hispana.
 
-Nuestro objetivo es acercar el mundo de ciencias de datos a nuestra profesión, adaptando el contenido a nuestros skills y conocimientos, y también siempre que podemos, usando datos relacionados con la gestión de personas, y en castellano, para hacer más accesible el aprendizaje.
+Nuestro objetivo es acercar el mundo de ciencias de datos a nuestra profesión, adaptando el contenido a nuestros skills y conocimientos, y también siempre que podemos, usando datos relacionados con la gestión de personas y en castellano, para hacer más accesible e inclusivo el aprendizaje.
 
-Este es un proyecto que ideó [Sergio García Mora](https://www.linkedin.com/in/sergiogarciamora/), y que reúne a gente de Argentina, Perú, Chile, Paraguay, Uruguay, Panamá, USA, Francia, y cada vez más y más profesionales de distintas latitudes se unen y contribuyen al proyecto.
+Este es un proyecto que reúne a gente de Argentina, Perú, Chile, Paraguay, Uruguay, Panamá, USA, Francia, y cada vez más y más profesionales de distintas latitudes se unen y contribuyen al proyecto.
 
 Para más información sobre el Club de R leé [este post](https://r4hr.club/2020/09/23/el-club-de-r-para-rrhh/), o escribinos a [info@r4hr.club](mailto:info@r4hr.club).
 
@@ -115,16 +115,18 @@ Habitualmente las presentaciones del Club las hacemos nosotros. Pero una vez al 
 
 .pull-left[
 
-<img src="Archivos/pablo_tiscornia.jpg" height="40" width="40" /> [Pablo Tiscornia](https://www.linkedin.com/in/ptiscornia/): Paquete EPH.
+<img src="Archivos/pablo_tiscornia.jpg" height="30" width="30" /> [Pablo Tiscornia](https://www.linkedin.com/in/ptiscornia/): Paquete EPH.
 
-<img src="Archivos/pablo_casas.jpg" height="40" width="40" /> [Pablo Casas](https://www.linkedin.com/in/pcasas/): Análisis Exploratorio de Datos con `funModeling`.
+<img src="Archivos/pablo_casas.jpg" height="30" width="30" /> [Pablo Casas](https://www.linkedin.com/in/pcasas/): Análisis Exploratorio con `funModeling`.
 
-<img src="Archivos/ana_diedrichs.jpg" height="40" width="40" /> [Ana Laura Diedrichs](https://www.linkedin.com/in/ana-laura-diedrichs-47038415/): Introducción a control de versiones con Git.
+<img src="Archivos/ana_diedrichs.jpg" height="30" width="30" /> [Ana Laura Diedrichs](https://www.linkedin.com/in/ana-laura-diedrichs-47038415/): Introducción a control de versiones con Git.
 
-<img src="Archivos/hernan_escudero.jpg" height="40" width="40" /> [Hernán Escudero](https://www.linkedin.com/in/hernanescudero/): Aplicaciones interactivas con `Shiny`.
+<img src="Archivos/hernan_escudero.jpg" height="30" width="30" /> [Hernán Escudero](https://www.linkedin.com/in/hernanescudero/): Aplicaciones interactivas con `Shiny`.
 
-<img src="Archivos/angie_scetta.jpg" height="40" width="40" /> [Ángeles Scetta](https://www.linkedin.com/in/mar%C3%ADa-de-los-%C3%A1ngeles-scetta-b7b82a80/): Análisis de datos geoespaciales en R.  
-]
+<img src="Archivos/angie_scetta.jpg" height="30" width="30" /> [Ángeles Scetta](https://www.linkedin.com/in/mar%C3%ADa-de-los-%C3%A1ngeles-scetta-b7b82a80/): Análisis de datos geoespaciales en R.  
+
+<img src="Archivos/paocorrales.png" height="30" width="30" /> [Paola Corrales](https://paocorrales.github.io/): Publicar RMarkdown en la Web.  
+]   
 
 --
 
@@ -151,12 +153,67 @@ La suscripción al Club tiene costo, que dedicamos principalmente a pagarlo los 
 .right[<img src="Archivos/invitados.jpg" width="35%" />]
 
 ---
+
+## Antes de empezar
+
+Algunas cosas que tienen que saber:
+
+
+--
+
+* No hace falta que tengan la cámara encendida. `r emo::ji("detective")`
+
+--
+
+* Esta sesión queda grabada y la subimos a Youtube. `r emo::ji("movie_camera")`
+
+--
+
+* Súmense al grupo de [Slack](https://join.slack.com/t/r4hr/shared_invite/zt-geqfwra8-iZv3G5admNbyuej2gyFQDg) ya que todas las consultas las hacemos por ahí. `r emo::ji("fist_right")``r emo::ji("fist_left")`
+
+--
+
+* Pueden interrumpir las veces que quieran. `r emo::ji("raising_hand")`
+
+---
 class: inverse center middle
 # Empecemos!
 
-<img src="https://media.giphy.com/media/adikIKGu30u6A/giphy.gif" width="60%" />
+<img src="https://media.giphy.com/media/xT1TTBAzDPt5O8vKtW/giphy.gif" width="60%" />
 
 ---
+# ¿Qué son los paquetes en R?
+
+R es un lenguaje abierto de programación, que se hizo muy popular para analizar datos pero que tienen infinidad de aplicaciones y usos que van más allá del análisis estadístico.
+
+Los *paquetes* son una suerte de "extensiones" que amplían la capacidad de R base. Pablo Tiscornia hizo una analogía muy buena para explicar qué son:
+
+--
+
+.pull-left[
+<img src="Archivos/R2.png" width="85%" />
+]
+
+--
+.pull-right[
+<img src="Archivos/R4.png" />
+]
+
+---
+# Tidy Data
+
+Cuando hacemos algún tutorial, los datos están perfectos, limpios, y prolijos. Y cuando querés aplicar el mismo código a tus propios datos, resulta que no funciona, o tenés que hacer mucho procesamiento de datos para terminar replicando un ejemplo de un tutorial.
+
+--
+
+Por estas razones, la limpieza de datos, suele representar entre el 60 al 80% de cualquier proyecto de Analytics, hasta lograr tener **datos ordenados** (tidy data). Entre algunos principios de *tidy data* podemos mencionar dos:
+
+--
+
+1. Cada variable forma una columna.
+2. Cada observación forma una fila.
+3. Cada tipo de unidad observacional forma una tabla.
+
 
 
 ---
@@ -170,4 +227,4 @@ Presentación realizada con el paquete [Xaringan](https://github.com/yihui/xarin
 
 Gracias a [Patricia Loto](https://twitter.com/patriloto) por compartir el [tutorial](https://twitter.com/patriloto/status/1260822644590608391?s=20)
 
-<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Introducción a RMarkdown con RStudio 1.4</span> por <a xmlns:cc="http://creativecommons.org/ns#" href="https://clubder-rmarkdown.netlify.app/#1" property="cc:attributionName" rel="cc:attributionURL">Club de R para RRHH</a> se distribuye bajo una <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Licencia Creative Commons Atribución-NoComercial 4.0 Internacional</a>.<br />Basada en una obra en <a xmlns:dct="http://purl.org/dc/terms/" href="https://github.com/r4hr/club_de_r" rel="dct:source">https://github.com/r4hr/club_de_r</a>.<br />Permisos más allá del alcance de esta licencia pueden estar disponibles en <a xmlns:cc="http://creativecommons.org/ns#" href="https://r4hr.club" rel="cc:morePermissions">https://r4hr.club</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Introducción a dplyr</span> por <a xmlns:cc="http://creativecommons.org/ns#" href="https://clubder-dplyr.netlify.app/#1" property="cc:attributionName" rel="cc:attributionURL">Club de R para RRHH</a> se distribuye bajo una <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Licencia Creative Commons Atribución-NoComercial 4.0 Internacional</a>.<br />Basada en una obra en <a xmlns:dct="http://purl.org/dc/terms/" href="https://github.com/r4hr/r4hr_introduccion_dplyr" rel="dct:source">https://github.com/r4hr/r4hr_introduccion_dplyr</a>.<br />Permisos más allá del alcance de esta licencia pueden estar disponibles en <a xmlns:cc="http://creativecommons.org/ns#" href="https://r4hr.club" rel="cc:morePermissions">https://r4hr.club</a>.
