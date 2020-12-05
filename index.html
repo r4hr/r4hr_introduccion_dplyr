@@ -144,7 +144,7 @@ Todos los sábados de 10:00 a 11:30 hs. nos reunimos para revisar paquetes, tipo
 
 --
 
-La suscripción al Club tiene costo, que dedicamos principalmente a pagarlo los honorarios a los invitados, y a las licencias de algunas plataformas, pero desde **noviembre, la sesión del primer sábado de cada mes será abierta y gratuita** 🥳.
+La suscripción al Club tiene costo, que dedicamos principalmente a pagarlo los honorarios a los invitados, y a las licencias de algunas plataformas, pero desde **noviembre, la sesión del primer sábado de cada mes será abierta y gratuita** 🎉.
 
 .right[&lt;img src="Archivos/invitados.jpg" width="35%" /&gt;]
 
@@ -178,6 +178,25 @@ class: inverse center middle
 &lt;img src="https://media.giphy.com/media/xT1TTBAzDPt5O8vKtW/giphy.gif" width="60%" /&gt;
 
 ---
+# El lenguaje R
+## Proyectos
+
+Trabajar con proyectos en RStudio hace que todo el trabajo sea más sencillo. Los proyectos crean una carpeta en nuestra PC en donde se almacenarán los archivos, tablas, scripts, y hace que todo sea más organizado.
+
+--
+
+Para crear un proyecto tenés podés entrar en:
+* *File*
+  * *New project*
+
+Y luego poner el nombre de la carpeta.
+
+.pull-left[&lt;img src="Archivos/new_project.png" width="60%" /&gt;]
+
+
+.pull-rigt[&lt;img src="Archivos/new_projecto.png" width="30%" /&gt;]
+
+---
 # ¿Qué son los paquetes en R?
 
 R es un lenguaje abierto de programación, que se hizo muy popular para analizar datos pero que tienen infinidad de aplicaciones y usos que van más allá del análisis estadístico.
@@ -196,6 +215,29 @@ Los *paquetes* son una suerte de "extensiones" que amplían la capacidad de R ba
 ]
 
 ---
+# Instalando y cargando dplyr
+
+Al igual que la gran mayoría de los paquetes de R, podemos instalar el paquete directamente desde el script:
+
+
+```r
+# Instalando el paquete individual
+install.packages("dplyr")
+
+# Instalando el conjunto de paquetes de tidyverse
+install.packages("tidyverse")
+```
+
+--
+
+Antes de empezar a usar las funciones de dplyr, tenemos que cargarlo con la función `library()`:
+
+```r
+library(dplyr)
+```
+
+
+---
 # Tidy Data
 
 Cuando hacemos algún tutorial, los datos están perfectos, limpios, y prolijos. Y cuando querés aplicar el mismo código a tus propios datos, resulta que no funciona, o tenés que hacer mucho procesamiento de datos para terminar replicando un ejemplo de un tutorial.
@@ -209,6 +251,839 @@ Por estas razones, la limpieza de datos, suele representar entre el 60 al 80% de
 1. Cada variable forma una columna.
 2. Cada observación forma una fila.
 3. Cada tipo de unidad observacional forma una tabla.
+
+---
+# dplyr
+
+
+El paquete **dplyr** es uno de los paquetes embebidos dentro del paquete tidyverse: un conjunto de paquetes destinados a la limpieza y manipulación de datos y que se convirtió en un estándar en la práctica de la limpieza y manipulación de datos en R. `dplyr` fue desarrollado por Hadley Wickham, Romain François, Lionel Henry y Kirill Müller.
+
+Una de las razones por las que se hizo tan popular es por su sintaxis simple, con nombres de funciones que usan palabras muy coloquiales, imitando la forma en la que hablamos.
+
+Usualmente se dice que usamos `dplyr` para hacer *data wrangling*. Así que empecemos a aprender a domar nuestros datos.
+
+&lt;br&gt;&lt;br&gt;
+
+
+.center[
+&lt;img src="https://d33wubrfki0l68.cloudfront.net/621a9c8c5d7b47c4b6d72e8f01f28d14310e8370/193fc/css/images/hex/dplyr.png" width="15%" /&gt;
+]
+
+---
+# A domar datos!
+
+&lt;img src="https://media.giphy.com/media/d1Hrg00RXt3dfaFO/giphy.gif" /&gt;
+
+---
+class: inverse
+# Los cheatsheets
+## (machete, cola, trencito, copiatín, plage, batería, torpedo, chuleta, chanchullo, etc.)
+
+Los [*cheatsheet*](https://rstudio.com/resources/cheatsheets/) son documentos con resúmenes de las principales funciones de los paquetes más utilizados.
+
+La comunidad de R de hispanoamérica ha traducido unos cuantos, gracias a quienes podemos contar hoy con un cheatsheet en [castellano](https://github.com/rstudio/cheatsheets/raw/master/translations/spanish/data-wrangling-cheatsheet_Spanish.pdf).
+
+.right[
+&lt;img src="https://espaciociencia.com//wp-content/uploads/como-copiar-en-examen.jpg" width="35%"/&gt;
+]
+
+---
+# Los datasets
+
+.pull-left[
+&lt;img src="https://i.pinimg.com/originals/83/5c/33/835c33d22fd2ae61cbf0c14545524d54.jpg" /&gt;
+
+]
+
+.pull-right[
+
+```r
+library(dplyr) # Manipulación y limpieza de datos
+library(readr) # Lectura y carga de archivos
+
+# Cargamos encuesta de sueldos
+encuesta &lt;- read_delim("https://raw.githubusercontent.com/r4hr/r4hr_introduccion_dplyr/main/Datos/encuesta_sueldos.csv", delim = ",")
+
+# Cargamos otro archivo con kpis de ausentismo y de horas extras
+kpis &lt;- read_delim("https://raw.githubusercontent.com/r4hr/r4hr_introduccion_dplyr/main/Datos/kpi_aus_he.csv", delim = ";")
+```
+]
+---
+# Los "verbos" en dplyr
+
+Una de las razones por las cuales tidyverse se hizo tan popular es que la lógica de las funciones imita el razonamiento que haríamos verbalmente.
+
+--
+
+Por ejemplo, ¿cómo harían para calcular el sueldo promedio por puesto?
+
+--
+
+
+```r
+encuesta %&gt;% 
+  select(puesto, sueldo_bruto) %&gt;% # Selecciona las columnas
+  group_by(puesto) %&gt;%     # Agrupa por la variable puesto
+  summarise(sueldo_promedio = mean(sueldo_bruto)) %&gt;% # Crea una variable con el sueldo promedio
+  arrange(-sueldo_promedio) # Ordena descendentemente los resultados por la variable que pasemos.
+```
+
+```
+## # A tibble: 7 x 2
+##   puesto         sueldo_promedio
+##   &lt;chr&gt;                    &lt;dbl&gt;
+## 1 Gerente                230972.
+## 2 Director               210788.
+## 3 Jefe                   110486.
+## 4 HRBP                    93805.
+## 5 Responsable             75024.
+## 6 Analista                68061.
+## 7 Administrativo          44154.
+```
+
+---
+# dplyr
+## El "pipe"
+
+¿Vieron este símbolo `%&gt;%` en la slide anterior? En la jerga lo conocemos como *"pipe"* (atajo de teclado Ctrl + Mayús + M). Lo que nos permite este *"tubo"* es ordenar el código en secuencias, haciéndolo más comprensible a la lectura.
+
+Una de las ventajas del *pipe* es que no necesitamos invocar al dataframe en cada función que encadenamos en el pipe.
+
+.center[
+&lt;img src="Archivos/dplyr_funciones.png" width="57%"/&gt;
+]
+
+---
+# dplyr
+## Secuencias
+
+Por ejemplo, si quiero ver los sueldos brutos por puesto de las personas que no tienen gente a cargo ordenados por el puesto. Los pasos son:
+
+1. Elegir las variables puesto, sueldo_bruto, personas_a_cargo.
+2. Filtrar de la variable personas_a_cargo los casos que no tienen gente a cargo.
+3. Ordenar los resultados por puesto.
+
+&gt; Acá estoy usando la función `head()` para que quede prolijo en la presentación. Ustedes no la usen y recuerden sacar el último paréntesis
+
+
+```r
+head(arrange(filter(select(encuesta, puesto, sueldo_bruto, personas_a_cargo), personas_a_cargo &gt; 0), puesto))
+```
+
+```
+## # A tibble: 6 x 3
+##   puesto         sueldo_bruto personas_a_cargo
+##   &lt;chr&gt;                 &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Administrativo        94050                4
+## 2 Analista             650000               70
+## 3 Analista              37000               44
+## 4 Analista              65500                2
+## 5 Analista              45500              120
+## 6 Analista             134000                2
+```
+
+---
+
+## dplyr
+
+Esto mismo usando el pipe de dplyr lo hacemos así:
+
+```r
+encuesta %&gt;%
+  select(puesto, sueldo_bruto, personas_a_cargo) %&gt;%
+  filter(personas_a_cargo&gt;0) %&gt;%
+  arrange(puesto) %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 3
+##   puesto         sueldo_bruto personas_a_cargo
+##   &lt;chr&gt;                 &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Administrativo        94050                4
+## 2 Analista             650000               70
+## 3 Analista              37000               44
+## 4 Analista              65500                2
+## 5 Analista              45500              120
+## 6 Analista             134000                2
+```
+
+
+---
+# ¿Cuál es más fácil de entender?
+&lt;br&gt;
+
+### Código sin el pipe
+
+
+```r
+arrange(filter(select(encuesta, puesto, sueldo_bruto, personas_a_cargo), personas_a_cargo &gt; 0), puesto)
+```
+
+
+### Código con el pipe
+
+
+```r
+encuesta %&gt;%
+  select(puesto, sueldo_bruto, personas_a_cargo) %&gt;%
+  filter(personas_a_cargo&gt;0) %&gt;%
+  arrange(puesto)
+```
+---
+
+class: inverse, middle
+background-image: url("Archivos/dplyr.png")
+background-size: cover
+
+---
+# Las funciones de dplyr
+## select()
+
+La función `select()` sirve para elegir las columnas (variables) con las que queremos trabajar. También nos permite traer las columnas en el orden que las necesitemos.
+
+
+```r
+encuesta %&gt;% 
+  select(satisfaccion, sueldo_bruto) %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 2
+##   satisfaccion sueldo_bruto
+##          &lt;dbl&gt;        &lt;dbl&gt;
+## 1            2       41000 
+## 2            4       40000 
+## 3            3       43954.
+## 4            3       40000 
+## 5            2       15000 
+## 6            3       57000
+```
+
+---
+## select()
+
+select() tiene algunas variantes interesantes (y en general aplican para casi todas las funciones de dplyr).
+
+Supongamos que quiera seleccionar todas las columnas numéricas nada más:
+
+
+
+```r
+encuesta %&gt;%
+  select_if(is.numeric) %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 8
+##    edad empleados empleados_rh personas_a_cargo anios_rh sueldo_bruto aumento
+##   &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;            &lt;dbl&gt;    &lt;dbl&gt;        &lt;dbl&gt;   &lt;dbl&gt;
+## 1    31       400            6                0        8       41000        0
+## 2    28       150            3                0        9       40000       10
+## 3    25       186            2                0        2       43954.       0
+## 4    33         4            1                0        3       40000       20
+## 5    24        80            1                0        1       15000        0
+## 6    30       135            3                0        6       57000        0
+## # ... with 1 more variable: satisfaccion &lt;dbl&gt;
+```
+
+---
+
+
+## filter()
+
+.pull-left[
+`filter()` nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Empleados que tienen hijos
+
+
+```r
+encuesta %&gt;%
+  select(personas_a_cargo, sueldo_bruto) %&gt;% 
+  filter(personas_a_cargo  &gt; 0) %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 2
+##   personas_a_cargo sueldo_bruto
+##              &lt;dbl&gt;        &lt;dbl&gt;
+## 1                4        94050
+## 2               70       650000
+## 3               44        37000
+## 4                2        65500
+## 5              120        45500
+## 6                2       134000
+```
+
+]
+
+.pull-right[
+Estas son los operadores lógicos que nos van a ayudar con la función filter.
+
+&lt;img src="Archivos/operadores.png" /&gt;
+]
+
+---
+
+## filter()
+
+filter() nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Listado de respuestas de Universidad Privada y de empresas con más de 700 empleados.
+
+
+```r
+# Filtramos los empleados que son de Universidad Privada y de empresas con más de 700 empleados.
+encuesta %&gt;%
+  filter(universidad == "Universidad Privada" &amp;  empleados &gt; 700)
+```
+
+```
+## # A tibble: 61 x 15
+##    genero  edad universidad rubro empleados origen_capital empleados_rh puesto
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt; 
+##  1 Femen~    23 Universida~ Alim~     10000 Nacional                 40 Admin~
+##  2 Femen~    32 Universida~ Serv~     10000 Multinacional            10 Admin~
+##  3 Femen~    35 Universida~ Come~      1433 Nacional                 10 Anali~
+##  4 Femen~    41 Universida~ Tran~      1000 Nacional                  8 Anali~
+##  5 Femen~    27 Universida~ Prod~      5350 Multinacional           160 Anali~
+##  6 Femen~    31 Universida~ Petr~     60000 Multinacional          2500 Anali~
+##  7 Mascu~    29 Universida~ Banc~      5000 Nacional                  0 Anali~
+##  8 Femen~    34 Universida~ Tecn~      3500 Multinacional            50 Anali~
+##  9 Femen~    23 Universida~ Educ~      1300 Nacional                 12 Anali~
+## 10 Mascu~    24 Universida~ Hote~      3500 Multinacional           100 Anali~
+## # ... with 51 more rows, and 7 more variables: personas_a_cargo &lt;dbl&gt;,
+## #   anios_rh &lt;dbl&gt;, sueldo_bruto &lt;dbl&gt;, aumento &lt;dbl&gt;, erp &lt;chr&gt;,
+## #   satisfaccion &lt;dbl&gt;, buscando_trabajo &lt;chr&gt;
+```
+
+---
+## filter()
+
+filter() nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Empleados de dos rubros diferentes
+
+```r
+encuesta %&gt;%
+  filter(rubro == "Servicios de salud"| rubro == "Tecnologías de Información, Sistemas, y afines")
+```
+
+```
+## # A tibble: 119 x 15
+##    genero  edad universidad rubro empleados origen_capital empleados_rh puesto
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt; 
+##  1 Femen~    30 Universida~ Serv~       135 Nacional                  3 Admin~
+##  2 Femen~    39 Universida~ Tecn~        15 Nacional                  1 Admin~
+##  3 Femen~    30 Universida~ Serv~        65 Nacional                  3 Admin~
+##  4 Femen~    33 Universida~ Serv~       117 Nacional                  2 Admin~
+##  5 Femen~    25 Universida~ Serv~      1900 Nacional                 11 Admin~
+##  6 Femen~    35 Universida~ Serv~        30 Nacional                  8 Admin~
+##  7 Femen~    28 Universida~ Tecn~        50 Multinacional             5 Admin~
+##  8 Femen~    43 Universida~ Serv~       500 Nacional                 10 Admin~
+##  9 Femen~    24 Universida~ Tecn~       270 Nacional                  7 Anali~
+## 10 Femen~    25 Universida~ Tecn~       200 Nacional                  5 Anali~
+## # ... with 109 more rows, and 7 more variables: personas_a_cargo &lt;dbl&gt;,
+## #   anios_rh &lt;dbl&gt;, sueldo_bruto &lt;dbl&gt;, aumento &lt;dbl&gt;, erp &lt;chr&gt;,
+## #   satisfaccion &lt;dbl&gt;, buscando_trabajo &lt;chr&gt;
+```
+ 
+---
+## filter()
+Una alternativa es usar un vector de selección
+
+```r
+encuesta %&gt;%
+  filter(rubro %in% c("Servicios de salud", "Tecnologías de Información, Sistemas, y afines")) %&gt;% 
+  head()
+```
+
+---
+
+## filter()
+
+filter() nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Podemos filtrar un rango de sueldos de la siguiente manera combinando la función `between()`:
+
+
+```r
+encuesta %&gt;% 
+  filter(between(sueldo_bruto,      # Variable a filtrar 
+                 50000,             # Valor mínimo
+                 150000)) %&gt;%       # Valor máximo
+  head()
+```
+
+```
+## # A tibble: 6 x 15
+##   genero  edad universidad rubro empleados origen_capital empleados_rh puesto
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt; &lt;chr&gt; 
+## 1 Femen~    30 Universida~ Serv~       135 Nacional                  3 Admin~
+## 2 Femen~    39 Universida~ Tecn~        15 Nacional                  1 Admin~
+## 3 Femen~    23 Universida~ Alim~     10000 Nacional                 40 Admin~
+## 4 Femen~    30 Universida~ Serv~        65 Nacional                  3 Admin~
+## 5 Femen~    32 Universida~ Serv~     10000 Multinacional            10 Admin~
+## 6 Femen~    29 Universida~ Petr~       225 Multinacional             6 Admin~
+## # ... with 7 more variables: personas_a_cargo &lt;dbl&gt;, anios_rh &lt;dbl&gt;,
+## #   sueldo_bruto &lt;dbl&gt;, aumento &lt;dbl&gt;, erp &lt;chr&gt;, satisfaccion &lt;dbl&gt;,
+## #   buscando_trabajo &lt;chr&gt;
+```
+
+
+---
+## arrange()
+
+`arrange()` ordena las variables de acuerdo al criterio que queramos. Por default, ordena los datos ascendentemente.
+
+.pull-left[
+Ordenar las respuestas por edad
+
+
+```r
+encuesta %&gt;%
+  select(puesto, edad) %&gt;%
+  arrange(edad) %&gt;% head()
+```
+
+```
+## # A tibble: 6 x 2
+##   puesto    edad
+##   &lt;chr&gt;    &lt;dbl&gt;
+## 1 Analista    21
+## 2 Analista    22
+## 3 Analista    22
+## 4 Analista    22
+## 5 Analista    22
+## 6 Jefe        22
+```
+
+]
+
+--
+
+.pull-right[
+La función `arrange()` también se puede usar con variables de texto.
+
+
+```r
+encuesta %&gt;%
+  select(rubro, empleados) %&gt;%
+  arrange(rubro) %&gt;% head()
+```
+
+```
+## # A tibble: 6 x 2
+##   rubro                                            empleados
+##   &lt;chr&gt;                                                &lt;dbl&gt;
+## 1 Agricultura; plantaciones,otros sectores rurales       600
+## 2 Agricultura; plantaciones,otros sectores rurales       320
+## 3 Agricultura; plantaciones,otros sectores rurales       352
+## 4 Agricultura; plantaciones,otros sectores rurales        65
+## 5 Agricultura; plantaciones,otros sectores rurales        80
+## 6 Agricultura; plantaciones,otros sectores rurales        35
+```
+
+]
+
+---
+## arrange()
+
+Para ordenar los datos ascendentemente hay dos alternativas.
+
+.pull-left[
+Con la función `desc()`.
+
+
+```r
+encuesta %&gt;%
+  select(puesto, edad) %&gt;%
+  arrange(desc(edad)) %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 2
+##   puesto   edad
+##   &lt;chr&gt;   &lt;dbl&gt;
+## 1 Jefe       63
+## 2 Jefe       63
+## 3 Jefe       58
+## 4 Gerente    54
+## 5 Jefe       54
+## 6 Gerente    53
+```
+
+]
+
+--
+
+.pull-right[
+Con el signo menos `-`.
+
+```r
+encuesta %&gt;%
+  select(puesto, edad) %&gt;%
+  arrange(-edad)  %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 2
+##   puesto   edad
+##   &lt;chr&gt;   &lt;dbl&gt;
+## 1 Jefe       63
+## 2 Jefe       63
+## 3 Jefe       58
+## 4 Gerente    54
+## 5 Jefe       54
+## 6 Gerente    53
+```
+
+]
+
+---
+
+## group_by()
+
+`group_by()` es una función para agrupar las variables en función de los valores de una de las columnas. Por ejemplo si quiero ver el sueldo por puesto.
+
+
+```r
+encuesta %&gt;%
+  select(puesto, sueldo_bruto) %&gt;%
+  group_by(puesto) %&gt;% 
+  head()
+```
+
+```
+## # A tibble: 6 x 2
+## # Groups:   puesto [1]
+##   puesto         sueldo_bruto
+##   &lt;chr&gt;                 &lt;dbl&gt;
+## 1 Administrativo       41000 
+## 2 Administrativo       40000 
+## 3 Administrativo       43954.
+## 4 Administrativo       40000 
+## 5 Administrativo       15000 
+## 6 Administrativo       57000
+```
+
+---
+
+## summarise()
+
+`summarise()` se usa para crear nuevas columnas con medidas de resumen estadístico. Se suele usar mucho en conjunto con group_by().
+
+Por ejemplo si quiero calcular el sueldo promedio por puesto:
+
+
+```r
+encuesta %&gt;%
+  select(puesto, sueldo_bruto) %&gt;%
+  group_by(puesto) %&gt;%
+* summarise(sueldo_promedio = mean(sueldo_bruto))
+```
+
+```
+## # A tibble: 7 x 2
+##   puesto         sueldo_promedio
+##   &lt;chr&gt;                    &lt;dbl&gt;
+## 1 Administrativo          44154.
+## 2 Analista                68061.
+## 3 Director               210788.
+## 4 Gerente                230972.
+## 5 HRBP                    93805.
+## 6 Jefe                   110486.
+## 7 Responsable             75024.
+```
+
+---
+
+## mutate()
+
+`mutate()` se usa para crear una nueva columna a partir de las columnas que ya existen en el dataset, y/o modificar las variables existentes.
+
+Hagamos el siguiente cálculo: pasemos los sueldos que están en pesos argentinos, a dólares. Para lograr eso, tenemos que dividir la variable `sueldo_bruto` por `86.75` que es el precio de venta del dólar.
+
+
+```r
+encuesta %&gt;%
+  select(puesto, sueldo_bruto) %&gt;%
+* mutate(sueldo_dolar = sueldo_bruto / 86.75) %&gt;%
+  head()
+```
+
+```
+## # A tibble: 6 x 3
+##   puesto         sueldo_bruto sueldo_dolar
+##   &lt;chr&gt;                 &lt;dbl&gt;        &lt;dbl&gt;
+## 1 Administrativo       41000          473.
+## 2 Administrativo       40000          461.
+## 3 Administrativo       43954.         507.
+## 4 Administrativo       40000          461.
+## 5 Administrativo       15000          173.
+## 6 Administrativo       57000          657.
+```
+---
+## mutate 
+
+Con mutate podemos cambiar las características de algunas variables. Por ejemplo, la variable `puesto` es de tipo `character` o nominal, es decir que no nos permite ordenar sus resultados. 
+
+```r
+class(encuesta$puesto)
+```
+
+```
+## [1] "character"
+```
+
+Si convertimos esta variable en tipo `factor` podremos definir el orden que nos sirva para representar la jerarquía.
+
+
+```r
+encuesta %&gt;% select(puesto, sueldo_bruto) %&gt;% 
+* mutate(puesto = factor(puesto, levels = c("Director", "Gerente", "Jefe", "Responsable",
+*                                           "HRBP", "Analista", "Administrativo"))) %&gt;%
+  group_by(puesto) %&gt;% summarise(sueldo_promedio = mean(sueldo_bruto))
+```
+
+```
+## # A tibble: 7 x 2
+##   puesto         sueldo_promedio
+##   &lt;fct&gt;                    &lt;dbl&gt;
+## 1 Director               210788.
+## 2 Gerente                230972.
+## 3 Jefe                   110486.
+## 4 Responsable             75024.
+## 5 HRBP                    93805.
+## 6 Analista                68061.
+## 7 Administrativo          44154.
+```
+
+---
+## mutate + case_when
+
+.left-column[
+La función `case_when` la podemos usar dentro de mutate para crear categorías a partir de variables numéricas. 
+
+Usemos esto para crear rangos de empleados, y calcular el sueldo promedio después.
+]
+
+.right-column[
+
+
+```r
+encuesta %&gt;% 
+  select(empleados, sueldo_bruto) %&gt;% 
+* mutate(cantidad_empleados = case_when(
+*   empleados &lt;= 100 ~ "Hasta 100",
+*   empleados &lt;= 500 ~ "Hasta 500",
+*   empleados &lt;= 1000 ~ "Hasta 1000",
+*   empleados &lt;= 5000 ~ "Hasta 5000",
+*   empleados = TRUE ~ "Más de 5000"
+  )) %&gt;% 
+  group_by(cantidad_empleados) %&gt;% 
+  summarise(sueldo_promedio = mean(sueldo_bruto))
+```
+
+```
+## # A tibble: 5 x 2
+##   cantidad_empleados sueldo_promedio
+##   &lt;chr&gt;                        &lt;dbl&gt;
+## 1 Hasta 100                   84486.
+## 2 Hasta 1000                  88247.
+## 3 Hasta 500                  103045.
+## 4 Hasta 5000                  94464.
+## 5 Más de 5000                 92847.
+```
+]
+
+
+---
+
+## rename()
+
+Muchas veces los nombres de las tablas vienen con nombres poco comprensibles si no estás familiarizado, `rename()` te permite cambiar el nombre de una variable.
+
+Su sintaxis es:
+
+--
+
+1. Nombre nuevo de la variable
+
+--
+
+2. Nombre original de la variable
+
+
+```r
+encuesta &lt;- encuesta %&gt;%
+  rename(sistema_gestion = erp) 
+
+names(encuesta)
+```
+
+```
+##  [1] "genero"           "edad"             "universidad"      "rubro"           
+##  [5] "empleados"        "origen_capital"   "empleados_rh"     "puesto"          
+##  [9] "personas_a_cargo" "anios_rh"         "sueldo_bruto"     "aumento"         
+## [13] "sistema_gestion"  "satisfaccion"     "buscando_trabajo"
+```
+
+---
+# Transformando datasets
+
+Muchas veces sucede que en los nombres de las columnas, hay datos que son en realidad variables. como por ejemplo en el dataset `kpis`.
+
+
+```r
+kpis
+```
+
+```
+## # A tibble: 4 x 14
+##   Sector KPI     ene   feb   mar   abr   may   jun   jul   ago   sep   oct   nov
+##   &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Plant~ Ause~ 0.061 0.045 0.042 0.068 0.083 0.084 0.07  0.059 0.07  0.019 0.063
+## 2 Plant~ Hora~ 0.08  0.066 0.03  0.051 0.051 0.04  0.06  0.055 0.041 0.119 0.133
+## 3 Plant~ Ause~ 0.04  0.061 0.045 0.072 0.067 0.035 0.052 0.051 0.05  0.065 0.136
+## 4 Plant~ Hora~ 0.047 0.02  0.018 0.023 0.022 0.027 0.019 0.034 0.034 0.084 0.091
+## # ... with 1 more variable: dic &lt;dbl&gt;
+```
+
+--
+
+Esto es lo que se conoce como un dataset *ancho*. Para hacer gráficos sobre su evolución, o hacer otros análisis estadísticos, tenemos que pivotearlo para hacerlo un dataset **largo**.
+
+---
+# Transformando datasets
+## pivot_longer()
+
+Como los meses son una variable más, deberían estar en filas. Para eso usaremos la función `pivot_longer` del paquete **tidyr**. 
+
+
+```r
+library(tidyr)
+
+kpis_long &lt;- kpis %&gt;% 
+  pivot_longer(cols = c("ene":"dic"), # Selecciona columnas a pivotar
+               names_to = "mes",   # Nombre de la variable que contendrá lo que antes era nombre de columna
+               values_to = "tasa") # Nombre de la variable que contendrá los valores
+
+head(kpis_long)
+```
+
+```
+## # A tibble: 6 x 4
+##   Sector   KPI            mes    tasa
+##   &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt; &lt;dbl&gt;
+## 1 Planta A Ausentismo (%) ene   0.061
+## 2 Planta A Ausentismo (%) feb   0.045
+## 3 Planta A Ausentismo (%) mar   0.042
+## 4 Planta A Ausentismo (%) abr   0.068
+## 5 Planta A Ausentismo (%) may   0.083
+## 6 Planta A Ausentismo (%) jun   0.084
+```
+
+
+---
+class: inverse, middle
+
+# Secuencia de análisis
+
+## 1. Agrupar los grupos que quiero comparar (group_by)
+## 2. Calcular medidas de resumen estadístico (summarise, mutate)
+## 3. Graficar los resultados (ggplot)
+
+---
+# Análisis de kpi's
+
+Primero tenemos que ordenar los meses para que aparezcan en el orden correcto, y no alfabéticamente.
+
+
+```r
+kpis_long &lt;- kpis_long %&gt;% 
+  mutate(mes = factor(mes, levels = c("ene", "feb", "mar", "abr", "may", "jun",
+                                      "jul", "ago", "sep", "oct", "nov", "dic")))
+```
+
+---
+# Análisis de kpi's
+
+Ahora podemos comparar los resultados por planta.
+
+.pull-left[
+
+```r
+library(ggplot2)
+
+kpis_long %&gt;% 
+  group_by(Sector, KPI) %&gt;% 
+  summarise(tasa_anual = mean(tasa)) %&gt;% 
+  ggplot(aes(x = KPI, y = tasa_anual)) +
+  geom_col() +
+  facet_grid(~Sector)
+```
+
+]
+
+.pull-right[
+&lt;img src="index_files/figure-html/unnamed-chunk-30-1.png" width="504" /&gt;
+
+]
+
+---
+# Análisis de kpi's
+
+Y ahora podemos hacer un análisis de la evolución mensual de estos KPI's
+
+.pull-left[
+
+```r
+ggplot(kpis_long, aes(x = mes, y = tasa, group = Sector, colour = Sector)) +
+  geom_line(size = 1) +
+  geom_point(size = 2)+
+  facet_wrap(~KPI,nrow = 2)
+```
+
+]
+
+.pull-right[
+&lt;img src="index_files/figure-html/unnamed-chunk-31-1.png" width="504" /&gt;
+
+]
+
+---
+class: middle
+# Muchas gracias!
+
+.pull-left[
+&lt;img src="https://media.giphy.com/media/lLp9dTw6qxcD6/giphy.gif" /&gt;
+]
+
+.pull-right[
+Si te gustó esta sesión podés suscribirte escribiéndonos a [info@r4hr.club](mailto:info@r4hr.club) y acceder a todas las sesiones pasadas, y participar de las próximas sesiones con especialistas.
+
+Recuerden compartir sus capturas de pantalla y sensaciones con los hashtags:
+
+* ### #R4HR
+* ### #data4hr
+* ### #PeopleAnalytics
+* ### #RStats_ES
+* ### #BetterWithData
+]
+---
+class: inverse, center, middle
+
+## Seguinos en nuestras redes
+
+### [link.tree/r4hrclub](https://www.linktr.ee/r4hrclub) 📡
+&lt;img src="https://media.giphy.com/media/93fsZ7rI488L908x0T/giphy.gif" /&gt;
 
 
 

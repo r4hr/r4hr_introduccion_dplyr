@@ -182,6 +182,25 @@ class: inverse center middle
 <img src="https://media.giphy.com/media/xT1TTBAzDPt5O8vKtW/giphy.gif" width="60%" />
 
 ---
+# El lenguaje R
+## Proyectos
+
+Trabajar con proyectos en RStudio hace que todo el trabajo sea más sencillo. Los proyectos crean una carpeta en nuestra PC en donde se almacenarán los archivos, tablas, scripts, y hace que todo sea más organizado.
+
+--
+
+Para crear un proyecto tenés podés entrar en:
+* *File*
+  * *New project*
+
+Y luego poner el nombre de la carpeta.
+
+.pull-left[<img src="Archivos/new_project.png" width="60%" />]
+
+
+.pull-rigt[<img src="Archivos/new_projecto.png" width="30%" />]
+
+---
 # ¿Qué son los paquetes en R?
 
 R es un lenguaje abierto de programación, que se hizo muy popular para analizar datos pero que tienen infinidad de aplicaciones y usos que van más allá del análisis estadístico.
@@ -200,6 +219,28 @@ Los *paquetes* son una suerte de "extensiones" que amplían la capacidad de R ba
 ]
 
 ---
+# Instalando y cargando dplyr
+
+Al igual que la gran mayoría de los paquetes de R, podemos instalar el paquete directamente desde el script:
+
+```{r eval=FALSE}
+# Instalando el paquete individual
+install.packages("dplyr")
+
+# Instalando el conjunto de paquetes de tidyverse
+install.packages("tidyverse")
+
+```
+
+--
+
+Antes de empezar a usar las funciones de dplyr, tenemos que cargarlo con la función `library()`:
+```{r}
+library(dplyr)
+```
+
+
+---
 # Tidy Data
 
 Cuando hacemos algún tutorial, los datos están perfectos, limpios, y prolijos. Y cuando querés aplicar el mismo código a tus propios datos, resulta que no funciona, o tenés que hacer mucho procesamiento de datos para terminar replicando un ejemplo de un tutorial.
@@ -213,6 +254,546 @@ Por estas razones, la limpieza de datos, suele representar entre el 60 al 80% de
 1. Cada variable forma una columna.
 2. Cada observación forma una fila.
 3. Cada tipo de unidad observacional forma una tabla.
+
+---
+# dplyr
+
+
+El paquete **dplyr** es uno de los paquetes embebidos dentro del paquete tidyverse: un conjunto de paquetes destinados a la limpieza y manipulación de datos y que se convirtió en un estándar en la práctica de la limpieza y manipulación de datos en R. `dplyr` fue desarrollado por Hadley Wickham, Romain François, Lionel Henry y Kirill Müller.
+
+Una de las razones por las que se hizo tan popular es por su sintaxis simple, con nombres de funciones que usan palabras muy coloquiales, imitando la forma en la que hablamos.
+
+Usualmente se dice que usamos `dplyr` para hacer *data wrangling*. Así que empecemos a aprender a domar nuestros datos.
+
+<br><br>
+
+
+.center[
+<img src="https://d33wubrfki0l68.cloudfront.net/621a9c8c5d7b47c4b6d72e8f01f28d14310e8370/193fc/css/images/hex/dplyr.png" width="15%" />
+]
+
+---
+# A domar datos!
+
+<img src="https://media.giphy.com/media/d1Hrg00RXt3dfaFO/giphy.gif" />
+
+---
+class: inverse
+# Los cheatsheets
+## (machete, cola, trencito, copiatín, plage, batería, torpedo, chuleta, chanchullo, etc.)
+
+Los [*cheatsheet*](https://rstudio.com/resources/cheatsheets/) son documentos con resúmenes de las principales funciones de los paquetes más utilizados.
+
+La comunidad de R de hispanoamérica ha traducido unos cuantos, gracias a quienes podemos contar hoy con un cheatsheet en [castellano](https://github.com/rstudio/cheatsheets/raw/master/translations/spanish/data-wrangling-cheatsheet_Spanish.pdf).
+
+.right[
+<img src="https://espaciociencia.com//wp-content/uploads/como-copiar-en-examen.jpg" width="35%"/>
+]
+
+---
+# Los datasets
+
+.pull-left[
+<img src="https://i.pinimg.com/originals/83/5c/33/835c33d22fd2ae61cbf0c14545524d54.jpg" />
+
+]
+
+.pull-right[
+```{r}
+library(dplyr) # Manipulación y limpieza de datos
+library(readr) # Lectura y carga de archivos
+
+# Cargamos encuesta de sueldos
+encuesta <- read_delim("https://raw.githubusercontent.com/r4hr/r4hr_introduccion_dplyr/main/Datos/encuesta_sueldos.csv", delim = ",")
+
+# Cargamos otro archivo con kpis de ausentismo y de horas extras
+kpis <- read_delim("https://raw.githubusercontent.com/r4hr/r4hr_introduccion_dplyr/main/Datos/kpi_aus_he.csv", delim = ";")
+```
+]
+---
+# Los "verbos" en dplyr
+
+Una de las razones por las cuales tidyverse se hizo tan popular es que la lógica de las funciones imita el razonamiento que haríamos verbalmente.
+
+--
+
+Por ejemplo, ¿cómo harían para calcular el sueldo promedio por puesto?
+
+--
+
+```{r}
+encuesta %>% 
+  select(puesto, sueldo_bruto) %>% # Selecciona las columnas
+  group_by(puesto) %>%     # Agrupa por la variable puesto
+  summarise(sueldo_promedio = mean(sueldo_bruto)) %>% # Crea una variable con el sueldo promedio
+  arrange(-sueldo_promedio) # Ordena descendentemente los resultados por la variable que pasemos.
+```
+
+---
+# dplyr
+## El "pipe"
+
+¿Vieron este símbolo `%>%` en la slide anterior? En la jerga lo conocemos como *"pipe"* (atajo de teclado Ctrl + Mayús + M). Lo que nos permite este *"tubo"* es ordenar el código en secuencias, haciéndolo más comprensible a la lectura.
+
+Una de las ventajas del *pipe* es que no necesitamos invocar al dataframe en cada función que encadenamos en el pipe.
+
+.center[
+<img src="Archivos/dplyr_funciones.png" width="57%"/>
+]
+
+---
+# dplyr
+## Secuencias
+
+Por ejemplo, si quiero ver los sueldos brutos por puesto de las personas que no tienen gente a cargo ordenados por el puesto. Los pasos son:
+
+1. Elegir las variables puesto, sueldo_bruto, personas_a_cargo.
+2. Filtrar de la variable personas_a_cargo los casos que no tienen gente a cargo.
+3. Ordenar los resultados por puesto.
+
+> Acá estoy usando la función `head()` para que quede prolijo en la presentación. Ustedes no la usen y recuerden sacar el último paréntesis
+
+```{r}
+head(arrange(filter(select(encuesta, puesto, sueldo_bruto, personas_a_cargo), personas_a_cargo > 0), puesto))
+```
+
+---
+
+## dplyr
+
+Esto mismo usando el pipe de dplyr lo hacemos así:
+```{r}
+encuesta %>%
+  select(puesto, sueldo_bruto, personas_a_cargo) %>%
+  filter(personas_a_cargo>0) %>%
+  arrange(puesto) %>% 
+  head()
+```
+
+
+---
+# ¿Cuál es más fácil de entender?
+<br>
+
+### Código sin el pipe
+
+```{r eval=FALSE}
+arrange(filter(select(encuesta, puesto, sueldo_bruto, personas_a_cargo), personas_a_cargo > 0), puesto)
+
+```
+
+
+### Código con el pipe
+
+```{r eval=FALSE}
+encuesta %>%
+  select(puesto, sueldo_bruto, personas_a_cargo) %>%
+  filter(personas_a_cargo>0) %>%
+  arrange(puesto)
+```
+---
+
+class: inverse, middle
+background-image: url("Archivos/dplyr.png")
+background-size: cover
+
+---
+# Las funciones de dplyr
+## select()
+
+La función `select()` sirve para elegir las columnas (variables) con las que queremos trabajar. También nos permite traer las columnas en el orden que las necesitemos.
+
+```{r}
+encuesta %>% 
+  select(satisfaccion, sueldo_bruto) %>% 
+  head()
+```
+
+---
+## select()
+
+select() tiene algunas variantes interesantes (y en general aplican para casi todas las funciones de dplyr).
+
+Supongamos que quiera seleccionar todas las columnas numéricas nada más:
+
+
+```{r}
+encuesta %>%
+  select_if(is.numeric) %>% 
+  head()
+```
+
+---
+
+
+## filter()
+
+.pull-left[
+`filter()` nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Empleados que tienen hijos
+
+```{r}
+encuesta %>%
+  select(personas_a_cargo, sueldo_bruto) %>% 
+  filter(personas_a_cargo  > 0) %>% 
+  head()
+```
+
+]
+
+.pull-right[
+Estas son los operadores lógicos que nos van a ayudar con la función filter.
+
+<img src="Archivos/operadores.png" />
+]
+
+---
+
+## filter()
+
+filter() nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Listado de respuestas de Universidad Privada y de empresas con más de 700 empleados.
+
+```{r}
+# Filtramos los empleados que son de Universidad Privada y de empresas con más de 700 empleados.
+encuesta %>%
+  filter(universidad == "Universidad Privada" &  empleados > 700)
+```
+
+---
+## filter()
+
+filter() nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Empleados de dos rubros diferentes
+```{r}
+encuesta %>%
+  filter(rubro == "Servicios de salud"| rubro == "Tecnologías de Información, Sistemas, y afines")
+```
+ 
+---
+## filter()
+Una alternativa es usar un vector de selección
+```{r eval = FALSE}
+encuesta %>%
+  filter(rubro %in% c("Servicios de salud", "Tecnologías de Información, Sistemas, y afines")) %>% 
+  head()
+```
+
+---
+
+## filter()
+
+filter() nos permite obtener las filas (observaciones) que cumplen con las condiciones que necesitamos.
+
+Podemos filtrar un rango de sueldos de la siguiente manera combinando la función `between()`:
+
+```{r}
+encuesta %>% 
+  filter(between(sueldo_bruto,      # Variable a filtrar 
+                 50000,             # Valor mínimo
+                 150000)) %>%       # Valor máximo
+  head()
+```
+
+
+---
+## arrange()
+
+`arrange()` ordena las variables de acuerdo al criterio que queramos. Por default, ordena los datos ascendentemente.
+
+.pull-left[
+Ordenar las respuestas por edad
+
+```{r}
+encuesta %>%
+  select(puesto, edad) %>%
+  arrange(edad) %>% head()
+```
+
+]
+
+--
+
+.pull-right[
+La función `arrange()` también se puede usar con variables de texto.
+
+```{r}
+encuesta %>%
+  select(rubro, empleados) %>%
+  arrange(rubro) %>% head()
+```
+
+]
+
+---
+## arrange()
+
+Para ordenar los datos ascendentemente hay dos alternativas.
+
+.pull-left[
+Con la función `desc()`.
+
+```{r}
+encuesta %>%
+  select(puesto, edad) %>%
+  arrange(desc(edad)) %>% 
+  head()
+```
+
+]
+
+--
+
+.pull-right[
+Con el signo menos `-`.
+```{r}
+encuesta %>%
+  select(puesto, edad) %>%
+  arrange(-edad)  %>% 
+  head()
+```
+
+]
+
+---
+
+## group_by()
+
+`group_by()` es una función para agrupar las variables en función de los valores de una de las columnas. Por ejemplo si quiero ver el sueldo por puesto.
+
+```{r}
+encuesta %>%
+  select(puesto, sueldo_bruto) %>%
+  group_by(puesto) %>% 
+  head()
+```
+
+---
+
+## summarise()
+
+`summarise()` se usa para crear nuevas columnas con medidas de resumen estadístico. Se suele usar mucho en conjunto con group_by().
+
+Por ejemplo si quiero calcular el sueldo promedio por puesto:
+
+```{r}
+encuesta %>%
+  select(puesto, sueldo_bruto) %>%
+  group_by(puesto) %>%
+  summarise(sueldo_promedio = mean(sueldo_bruto)) #<<
+```
+
+---
+
+## mutate()
+
+`mutate()` se usa para crear una nueva columna a partir de las columnas que ya existen en el dataset, y/o modificar las variables existentes.
+
+Hagamos el siguiente cálculo: pasemos los sueldos que están en pesos argentinos, a dólares. Para lograr eso, tenemos que dividir la variable `sueldo_bruto` por `86.75` que es el precio de venta del dólar.
+
+```{r}
+encuesta %>%
+  select(puesto, sueldo_bruto) %>%
+  mutate(sueldo_dolar = sueldo_bruto / 86.75) %>% #<<
+  head()
+```
+---
+## mutate 
+
+Con mutate podemos cambiar las características de algunas variables. Por ejemplo, la variable `puesto` es de tipo `character` o nominal, es decir que no nos permite ordenar sus resultados. 
+```{r}
+class(encuesta$puesto)
+```
+
+Si convertimos esta variable en tipo `factor` podremos definir el orden que nos sirva para representar la jerarquía.
+
+```{r}
+encuesta %>% select(puesto, sueldo_bruto) %>% 
+  mutate(puesto = factor(puesto, levels = c("Director", "Gerente", "Jefe", "Responsable", #<<
+                                            "HRBP", "Analista", "Administrativo"))) %>%   #<<
+  group_by(puesto) %>% summarise(sueldo_promedio = mean(sueldo_bruto))
+  
+```
+
+---
+## mutate + case_when
+
+.left-column[
+La función `case_when` la podemos usar dentro de mutate para crear categorías a partir de variables numéricas. 
+
+Usemos esto para crear rangos de empleados, y calcular el sueldo promedio después.
+]
+
+.right-column[
+
+```{r}
+encuesta %>% 
+  select(empleados, sueldo_bruto) %>% 
+  mutate(cantidad_empleados = case_when( #<<
+    empleados <= 100 ~ "Hasta 100",      #<<
+    empleados <= 500 ~ "Hasta 500",      #<<
+    empleados <= 1000 ~ "Hasta 1000",    #<<
+    empleados <= 5000 ~ "Hasta 5000",    #<<
+    empleados = TRUE ~ "Más de 5000"     #<<
+  )) %>% 
+  group_by(cantidad_empleados) %>% 
+  summarise(sueldo_promedio = mean(sueldo_bruto))
+```
+]
+
+
+---
+
+## rename()
+
+Muchas veces los nombres de las tablas vienen con nombres poco comprensibles si no estás familiarizado, `rename()` te permite cambiar el nombre de una variable.
+
+Su sintaxis es:
+
+--
+
+1. Nombre nuevo de la variable
+
+--
+
+2. Nombre original de la variable
+
+```{r}
+encuesta <- encuesta %>%
+  rename(sistema_gestion = erp) 
+
+names(encuesta)
+```
+
+---
+# Transformando datasets
+
+Muchas veces sucede que en los nombres de las columnas, hay datos que son en realidad variables. como por ejemplo en el dataset `kpis`.
+
+```{r}
+kpis
+```
+
+--
+
+Esto es lo que se conoce como un dataset *ancho*. Para hacer gráficos sobre su evolución, o hacer otros análisis estadísticos, tenemos que pivotearlo para hacerlo un dataset **largo**.
+
+---
+# Transformando datasets
+## pivot_longer()
+
+Como los meses son una variable más, deberían estar en filas. Para eso usaremos la función `pivot_longer` del paquete **tidyr**. 
+
+```{r}
+library(tidyr)
+
+kpis_long <- kpis %>% 
+  pivot_longer(cols = c("ene":"dic"), # Selecciona columnas a pivotar
+               names_to = "mes",   # Nombre de la variable que contendrá lo que antes era nombre de columna
+               values_to = "tasa") # Nombre de la variable que contendrá los valores
+
+head(kpis_long)
+```
+
+
+---
+class: inverse, middle
+
+# Secuencia de análisis
+
+## 1. Agrupar los grupos que quiero comparar (group_by)
+## 2. Calcular medidas de resumen estadístico (summarise, mutate)
+## 3. Graficar los resultados (ggplot)
+
+---
+# Análisis de kpi's
+
+Primero tenemos que ordenar los meses para que aparezcan en el orden correcto, y no alfabéticamente.
+
+```{r}
+kpis_long <- kpis_long %>% 
+  mutate(mes = factor(mes, levels = c("ene", "feb", "mar", "abr", "may", "jun",
+                                      "jul", "ago", "sep", "oct", "nov", "dic")))
+```
+
+---
+# Análisis de kpi's
+
+Ahora podemos comparar los resultados por planta.
+
+.pull-left[
+```{r tasas, fig.show='hide'}
+library(ggplot2)
+
+kpis_long %>% 
+  group_by(Sector, KPI) %>% 
+  summarise(tasa_anual = mean(tasa)) %>% 
+  ggplot(aes(x = KPI, y = tasa_anual)) +
+  geom_col() +
+  facet_grid(~Sector)
+
+```
+
+]
+
+.pull-right[
+```{r ref.label="tasas", echo=FALSE}
+
+```
+
+]
+
+---
+# Análisis de kpi's
+
+Y ahora podemos hacer un análisis de la evolución mensual de estos KPI's
+
+.pull-left[
+```{r linea, fig.show='hide'}
+ggplot(kpis_long, aes(x = mes, y = tasa, group = Sector, colour = Sector)) +
+  geom_line(size = 1) +
+  geom_point(size = 2)+
+  facet_wrap(~KPI,nrow = 2)
+```
+
+]
+
+.pull-right[
+```{r ref.label="linea", echo=FALSE}
+
+```
+
+]
+
+---
+class: middle
+# Muchas gracias!
+
+.pull-left[
+<img src="https://media.giphy.com/media/lLp9dTw6qxcD6/giphy.gif" />
+]
+
+.pull-right[
+Si te gustó esta sesión podés suscribirte escribiéndonos a [info@r4hr.club](mailto:info@r4hr.club) y acceder a todas las sesiones pasadas, y participar de las próximas sesiones con especialistas.
+
+Recuerden compartir sus capturas de pantalla y sensaciones con los hashtags:
+
+* ### #R4HR
+* ### #data4hr
+* ### #PeopleAnalytics
+* ### #RStats_ES
+* ### #BetterWithData
+]
+---
+class: inverse, center, middle
+
+## Seguinos en nuestras redes
+
+### [link.tree/r4hrclub](https://www.linktr.ee/r4hrclub) `r emo::ji("satellite")`
+<img src="https://media.giphy.com/media/93fsZ7rI488L908x0T/giphy.gif" />
 
 
 
